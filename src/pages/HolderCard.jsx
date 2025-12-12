@@ -1,18 +1,47 @@
-import React, { useState } from "react";
+import axios from "axios";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 export default function HolderList() {
-  const [holders, setHolders] = useState([
-    { id: 1, name: "Ashish" },
-    { id: 2, name: "Rohan" },
-    { id: 3, name: "Simran" }
-  ]);
+  const [holders, setHolders] = useState([]);
 
-  const addHolder = () => {
+  const addHolder = async () => {
     const name = prompt("Enter new holder name");
     if (!name) return;
-    const newHolder = { id: Date.now(), name };
-    setHolders([...holders, newHolder]);
+
+    try {
+      const res = await axios.post("http://localhost:3000/addHolder", { name });
+
+      setHolders((prev) => [...prev, res.data.data]);
+
+    } catch (err) {
+      console.log("Error creating holder", err);
+      alert("Error creating holder");
+    }
+  };
+  useEffect(() => {
+    const fetchHolders = async () => {
+      try {
+        const res = await axios.get("http://localhost:3000/getall");
+        setHolders(res.data.data);
+      } catch (err) {
+        console.log("Error fetching holders", err);
+      }
+    };
+
+    fetchHolders();
+  }, []);
+
+  const deleteHolder = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this table?")) return;
+
+    try {
+      await axios.delete(`http://localhost:3000/deleteHolder/${id}`);
+      setHolders((prev) => prev.filter(h => h._id !== id));
+
+    } catch (err) {
+      alert("Error deleting holder");
+    }
   };
 
   return (
@@ -36,9 +65,18 @@ export default function HolderList() {
             </div>
             <div className="grid grid-cols-4 gap-5">
               {holders.map((h) => (
-                <Link key={h.id} to={`/table/${h.id}`}>
+                <Link key={h.id} to={`/table/${h._id}`}>
                   <div className="backdrop-blur-3xl  p-5 rounded-2xl shadow-xl cursor-pointer hover:scale-105 transition">
-                    <h2 className="text-xl text-white font-bold">{h.name}</h2>
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        deleteHolder(h._id);
+                      }}
+                      className="absolute top-2 right-2 bg-customTeal text-white px-2 py-0.1 rounded"
+                    >
+                      -
+                    </button>
+                    <h2 className="text-xl capitalize text-white font-bold">{h.name}</h2>
                     <p className="text-gray-600">Click to open table</p>
                   </div>
                 </Link>
