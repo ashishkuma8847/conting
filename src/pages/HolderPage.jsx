@@ -7,14 +7,14 @@ import { FaArrowLeftLong } from "react-icons/fa6";
 
 export default function TablePage() {
   const { holderId } = useParams();
-
+const Api = "https://cunting-backend-4.onrender.com"
   const [inputFields, setInputFields] = useState([]);
   const [name, setname] = useState();
   const [rows, setRows] = useState([]);
   console.log(rows)
   useEffect(() => {
     const fetchHolder = async () => {
-      const res = await axios.get(`http://localhost:3000/holder/${holderId}`);
+      const res = await axios.get(`${Api}/holder/${holderId}`);
 
       setInputFields(res.data.fields.map(f => ({ label: f, value: "" })));
       setRows(res.data.rows);
@@ -29,7 +29,7 @@ export default function TablePage() {
     const label = prompt("Enter field label");
     if (!label) return;
 
-    await axios.post(`http://localhost:3000/addField/${holderId}`, {
+    await axios.post(`${Api}/addField/${holderId}`, {
       field: label
     });
 
@@ -51,7 +51,7 @@ export default function TablePage() {
     const values = inputFields.map((f) => f.value);
 
     const res = await axios.post(
-      `http://localhost:3000/addRow/${holderId}`,
+      `${Api}/addRow/${holderId}`,
       { values }
     );
 
@@ -67,7 +67,7 @@ export default function TablePage() {
     if (!sure) return;
 
     const res = await axios.delete(
-      `http://localhost:3000/deleteRow/${holderId}/${index}`
+      `${Api}/deleteRow/${holderId}/${index}`
     );
 
     setRows(res.data.rows);
@@ -78,7 +78,7 @@ export default function TablePage() {
     if (!sure) return;
 
     const res = await axios.delete(
-      `http://localhost:3000/deleteField/${holderId}/${index}`
+      `${Api}/deleteField/${holderId}/${index}`
     );
 
     // Update UI with new updated backend data

@@ -4,13 +4,13 @@ import { Link } from "react-router-dom";
 
 export default function HolderList() {
   const [holders, setHolders] = useState([]);
-
+const Api = "https://cunting-backend-4.onrender.com"
   const addHolder = async () => {
     const name = prompt("Enter new holder name");
     if (!name) return;
 
     try {
-      const res = await axios.post("http://localhost:3000/addHolder", { name });
+      const res = await axios.post(`${Api}/addHolder`, { name });
 
       setHolders((prev) => [...prev, res.data.data]);
 
@@ -22,7 +22,7 @@ export default function HolderList() {
   useEffect(() => {
     const fetchHolders = async () => {
       try {
-        const res = await axios.get("http://localhost:3000/getall");
+        const res = await axios.get(`${Api}/getall`);
         setHolders(res.data.data);
       } catch (err) {
         console.log("Error fetching holders", err);
@@ -36,7 +36,7 @@ export default function HolderList() {
     if (!window.confirm("Are you sure you want to delete this table?")) return;
 
     try {
-      await axios.delete(`http://localhost:3000/deleteHolder/${id}`);
+      await axios.delete(`${Api}/deleteHolder/${id}`);
       setHolders((prev) => prev.filter(h => h._id !== id));
 
     } catch (err) {
