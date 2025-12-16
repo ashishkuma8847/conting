@@ -1,24 +1,35 @@
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useEffect, useState, CSSProperties } from "react";
 import { Link, useParams } from "react-router-dom";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { FaArrowLeftLong } from "react-icons/fa6";
+import { RxCross2 } from "react-icons/rx";
+import { ClipLoader } from "react-spinners";
+const override: CSSProperties = {
+  display: "block",
+  margin: "0 auto",
+  borderColor: "C",
+};
 
 export default function TablePage() {
   const { holderId } = useParams();
-const Api = "https://cunting-backend-4.onrender.com"
+
   const [inputFields, setInputFields] = useState([]);
   const [name, setname] = useState();
   const [rows, setRows] = useState([]);
-  console.log(rows)
+  const [LoadingInput, setLoadingInput] = useState(false);
+  const [LoadingCross, setLoadingCross] = useState(false);
+  const [LoadingRow, setLoadingRow] = useState(false);
+  const [LoadingRowdelete, setLoadingRowdelete] = useState(false);
   useEffect(() => {
     const fetchHolder = async () => {
-      const res = await axios.get(`${Api}/holder/${holderId}`);
+      const res = await axios.get(`http://localhost:3000/holder/${holderId}`);
 
       setInputFields(res.data.fields.map(f => ({ label: f, value: "" })));
       setRows(res.data.rows);
       setname(res.data.name)
+
     };
     fetchHolder();
   }, []);
@@ -26,14 +37,18 @@ const Api = "https://cunting-backend-4.onrender.com"
   // ADD INPUT FIELD
   // ------------------------------------------
   const addInputField = async () => {
+    setLoadingInput(true)
+
     const label = prompt("Enter field label");
     if (!label) return;
 
-    await axios.post(`${Api}/addField/${holderId}`, {
+    await axios.post(`http://localhost:3000/addField/${holderId}`, {
       field: label
     });
 
     setInputFields([...inputFields, { label, value: "" }]);
+    setLoadingInput(false)
+
   };
 
   // ------------------------------------------
@@ -45,73 +60,86 @@ const Api = "https://cunting-backend-4.onrender.com"
   // ADD ROW
   // ------------------------------------------
   const addRow = async () => {
+    setLoadingRow(true)
     const empty = inputFields.some((x) => !x.value.trim());
     if (empty) return alert("Fill all fields");
 
     const values = inputFields.map((f) => f.value);
 
     const res = await axios.post(
-      `${Api}/addRow/${holderId}`,
+      `http://localhost:3000/addRow/${holderId}`,
       { values }
     );
 
     setRows(res.data.rows); // always use backend rows
     setInputFields(inputFields.map(f => ({ ...f, value: "" })));
+    setLoadingRow(false)
+
   };
 
   // ------------------------------------------
   // DELETE ROW
   // ------------------------------------------
   const removeRow = async (index) => {
+    setLoadingRowdelete(true)
+
     const sure = window.confirm("Delete this row?");
     if (!sure) return;
 
     const res = await axios.delete(
-      `${Api}/deleteRow/${holderId}/${index}`
+      `http://localhost:3000/deleteRow/${holderId}/${index}`
     );
 
     setRows(res.data.rows);
+    setLoadingRowdelete(false)
+
   };
 
   const deleteField = async (index) => {
+    setLoadingCross(true)
+
     const sure = window.confirm("Delete this input field?");
     if (!sure) return;
 
     const res = await axios.delete(
-      `${Api}/deleteField/${holderId}/${index}`
+      `http://localhost:3000/deleteField/${holderId}/${index}`
     );
 
     // Update UI with new updated backend data
     setInputFields(res.data.fields.map(f => ({ label: f, value: "" })));
     setRows(res.data.rows);
+    setLoadingCross(false)
+
   };
 
 
   const downloadPDF = () => {
-  const doc = new jsPDF();
+    const doc = new jsPDF();
 
-  doc.setFontSize(18);
-  doc.text(`${name} Table`, 14, 20);
+    doc.setFontSize(18);
+    doc.text(`${name} Table`, 14, 20);
 
-  const headers = ["S.No", ...inputFields.map(f => f.label), "Created At"];
+    const headers = ["S.No", ...inputFields.map(f => f.label), "Created At"];
 
-  const data = rows.map((row, idx) => [
-    idx + 1,
-    ...row.values,
-    row.createdAt || "-"
-  ]);
+    const data = rows.map((row, idx) => [
+      idx + 1,
+      ...row.values,
+      row.createdAt || "-"
+    ]);
 
-  autoTable(doc, {
-    head: [headers],
-    body: data,
-    startY: 30,
-  });
+    autoTable(doc, {
+      head: [headers],
+      body: data,
+      startY: 30,
+    });
 
-  doc.save(`${name}-table.pdf`);
-};
+    doc.save(`${name}-table.pdf`);
+  };
 
   return (
+
     <div className="container font-poppins">
+
       <div className="backdrop-blur-3xl mt-20 flex flex-col gap-5 text-white p-6 rounded-2xl shadow-xl">
 
         <Link to="/">
@@ -120,51 +148,64 @@ const Api = "https://cunting-backend-4.onrender.com"
 
         <h1 className="text-4xl capitalize font-bold mb-4 ">
           {name}
-          <span className="text-customTeal"> Table</span>
         </h1>
 
         {/* ADD INPUT */}
         <div onClick={addInputField} className="flex cursor-pointer items-center text-white gap-5">
-          <button className="w-[50px] py-2 bg-customTeal text-white rounded-lg">+</button>
+          <button className={`${LoadingInput ? "cursor-not-allowed" : "cursor-pointer"} w-[50px] py-2 bg-customTeal text-white rounded-lg`}> {LoadingInput ?
+            <ClipLoader
+              color={"#ffffff"}
+              cssOverride={override}
+              size={20}
+              aria-label="Loading Spinner"
+              data-testid="loader"
+            /> :
+            "+"
+          }</button>
           <span>Create Input</span>
         </div>
 
-        {/* INPUT FIELDS */}
-        <div className="grid grid-cols-4 gap-4 mb-4">
-          {inputFields.map((f, index) => (
-            <div key={index} className="relative">
-              <input
-                className="px-4 py-2 outline-none placeholder-white border-none w-[200px] backdrop-blur-xl bg-customTeal rounded-lg"
-                placeholder={`Enter ${f.label}`}
-                value={f.value}
-                onChange={(e) => {
-                  const updated = [...inputFields];
-                  updated[index].value = e.target.value;
-                  setInputFields(updated);
-                }}
-              />
+         <form onSubmit={addRow}>
+          <div className="grid grid-cols-4 gap-4 mb-4">
+            {inputFields.map((f, index) => (
+              <div key={index} className="relative">
+                <input
+                  className="px-4 py-2 w-[200px] bg-customTeal placeholder-white rounded-lg"
+                  placeholder={`Enter ${f.label}`}
+                  value={f.value}
+                  onChange={(e) => {
+                    const updated = [...inputFields];
+                    updated[index].value = e.target.value;
+                    setInputFields(updated);
+                  }}
+                />
 
-              {/* Delete input */}
-              <button
-                onClick={() => deleteField(index)}
-                className="absolute top-[5px] right-[0px] bg-customTeal text-white px-2 py-0.5 rounded-full"
-              >
-                -
-              </button>
-            </div>
-          ))}
-        </div>
+                <button
+                  type="button" 
+                  onClick={() => deleteField(index)}
+                  className="absolute top-3  right-[30px]"
+                >
+                  {LoadingCross ? (
+                    <ClipLoader size={16} color="#fff" />
+                  ) : (
+                    <RxCross2 />
+                  )}
+                </button>
+              </div>
+            ))}
+          </div>
 
-        {/* ADD ROW */}
-        {
-          inputFields.length === 0 ? null : <button
-            onClick={addRow}
-            className="w-[300px] py-2 bg-customTeal text-white rounded-lg"
-          >
-            Submit
-          </button>
-        }
-       
+          {inputFields.length > 0 && (
+            <button
+              type="submit"
+              className="w-[300px] bg-customTeal py-2 rounded-lg"
+            >
+              {LoadingRow ? <ClipLoader size={18} color="#fff" /> : "Submit"}
+            </button>
+          )}
+        </form>
+
+
 
 
 
@@ -172,21 +213,21 @@ const Api = "https://cunting-backend-4.onrender.com"
         <div className="mt-6 overflow-auto">
           <table className="w-full bg-gray-50 rounded-xl overflow-hidden ">
             {
-               rows.length===0 ? null :
+              rows.length === 0 ? null :
 
-            <thead>
-              <tr className="bg-customTeal">
-                <th className="p-2">S.No</th>
+                <thead>
+                  <tr className="bg-customTeal">
+                    <th className="p-2">S.No</th>
 
-                {inputFields.map((f, i) => (
-                  <th className="p-2 relative" key={i}>
-                    {f.label}
-                  </th>
-                ))}
+                    {inputFields.map((f, i) => (
+                      <th className="p-2 relative" key={i}>
+                        {f.label}
+                      </th>
+                    ))}
 
-                <th className="p-2">Actions</th>
-              </tr>
-            </thead>
+                    <th className="p-2">Actions</th>
+                  </tr>
+                </thead>
             }
 
 
@@ -202,9 +243,19 @@ const Api = "https://cunting-backend-4.onrender.com"
                   <td className="p-2 text-center">
                     <button
                       onClick={() => removeRow(rowIndex)}
-                      className="px-3 py-1 bg-red-600 text-white rounded"
+                      className={`${LoadingRowdelete ? "cursor-not-allowed" : "cursor-pointer"} px-3 py-1 bg-red-600 text-white rounded`}
                     >
-                      Delete
+                      {LoadingRowdelete ?
+                        <ClipLoader
+                          color={"#ffffff"}
+                          loading={true}
+                          cssOverride={override}
+                          size={20}
+                          aria-label="Loading Spinner"
+                          data-testid="loader"
+                        /> :
+                        "Delete"
+                      }
                     </button>
                   </td>
                 </tr>
@@ -213,14 +264,14 @@ const Api = "https://cunting-backend-4.onrender.com"
 
           </table>
           {
-            rows.length===0 ? null : <button
-          onClick={downloadPDF}
-          className="w-[200px] mt-[30px] py-2 bg-customTeal text-white rounded-lg"
-        >
-          Download PDF
-        </button>
+            rows.length === 0 ? null : <button
+              onClick={downloadPDF}
+              className="w-[200px] mt-[30px] py-2 bg-customTeal text-white rounded-lg"
+            >
+              Download PDF
+            </button>
           }
-          
+
         </div>
       </div>
     </div>
