@@ -104,7 +104,9 @@ export default function TablePage() {
     const res = await axios.delete(
       `http://localhost:3000/deleteField/${holderId}/${index}`
     );
-
+axios.get("http://localhost:3000/getall", {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+      });
     // Update UI with new updated backend data
     setInputFields(res.data.fields.map(f => ({ label: f, value: "" })));
     setRows(res.data.rows);

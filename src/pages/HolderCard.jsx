@@ -21,8 +21,8 @@ export default function HolderList() {
     if (!name) return;
 
     try {
-      const res = await axios.post("http://localhost:3000/addHolder", { name });
-
+      const res = await axios.post("http://localhost:3000/addHolder", { name },  { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } });
+    
       setHolders((prev) => [...prev, res.data.data]);
 
     } catch (err) {
