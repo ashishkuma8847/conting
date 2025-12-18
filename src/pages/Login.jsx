@@ -19,6 +19,7 @@ export default function Login({onVerifiedtoken}) {
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
+    const url =process.env.REACT_APP_API_URL
 
   const submit = async (e) => {
     e.preventDefault();
@@ -26,7 +27,7 @@ export default function Login({onVerifiedtoken}) {
     setLoading(true);
 
     try {
-      const res = await axios.post("https://cunting-backend-5.onrender.com/login", form);
+      const res = await axios.post(`${url}/login`, form);
 
       alert(res.data.message || "Login successful");
 

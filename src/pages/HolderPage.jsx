@@ -14,6 +14,8 @@ const override: CSSProperties = {
 
 export default function TablePage({ token }) {
   const { holderId } = useParams();
+      const url =process.env.REACT_APP_API_URL
+
 
   const [inputFields, setInputFields] = useState([]);
   const [name, setname] = useState();
@@ -24,7 +26,7 @@ export default function TablePage({ token }) {
   const [LoadingRowdelete, setLoadingRowdelete] = useState(false);
   useEffect(() => {
     const fetchHolder = async () => {
-      const res = await axios.get(`http://localhost:3000/holder/${holderId}`);
+      const res = await axios.get(`${url}/holder/${holderId}`);
 
       setInputFields(res.data.fields.map(f => ({ label: f, value: "" })));
       setRows(res.data.rows);
@@ -45,7 +47,7 @@ export default function TablePage({ token }) {
       return;
     }
 
-    await axios.post(`http://localhost:3000/addField/${holderId}`, {
+    await axios.post(`${url}/addField/${holderId}`, {
       field: label
     });
 
@@ -73,7 +75,7 @@ export default function TablePage({ token }) {
     const values = inputFields.map((f) => f.value);
 
     const res = await axios.post(
-      `http://localhost:3000/addRow/${holderId}`,
+      `${url}/addRow/${holderId}`,
       { values }
     );
 
@@ -96,7 +98,7 @@ export default function TablePage({ token }) {
     }
 
     const res = await axios.delete(
-      `http://localhost:3000/deleteRow/${holderId}/${index}`
+      `${url}/deleteRow/${holderId}/${index}`
     );
 
     setRows(res.data.rows);
@@ -114,7 +116,7 @@ export default function TablePage({ token }) {
     }
 
     const res = await axios.delete(
-      `http://localhost:3000/deleteField/${holderId}/${index}`, { headers: { Authorization: `Bearer ${token}` } }
+      `${url}/deleteField/${holderId}/${index}`, { headers: { Authorization: `Bearer ${token}` } }
     );
 
     // Update UI with new updated backend data

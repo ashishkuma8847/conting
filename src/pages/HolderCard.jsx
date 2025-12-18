@@ -11,6 +11,9 @@ const override: CSSProperties = {
 };
 
 export default function HolderList({token}) {
+  
+    const url =process.env.REACT_APP_API_URL
+  
   const [holders, setHolders] = useState([]);
   const [loading, Setloading] = useState(false)
   const [loadingDelete, SetloadingDelete] = useState(false)
@@ -21,7 +24,7 @@ export default function HolderList({token}) {
     if (!name) return;
 
     try {
-      const res = await axios.post("http://localhost:3000/addHolder", { name },  { headers: { Authorization: `Bearer ${token}` } });
+      const res = await axios.post(`${url}/addHolder`, { name },  { headers: { Authorization: `Bearer ${token}` } });
     
       setHolders((prev) => [...prev, res.data.data]);
 
@@ -35,7 +38,7 @@ export default function HolderList({token}) {
   useEffect(() => {
     const fetchHolders = async () => {
       try {
-        const res = await axios.get("http://localhost:3000/getall", { headers: { Authorization: `Bearer ${token}` } });
+        const res = await axios.get(`${url}/getall`, { headers: { Authorization: `Bearer ${token}` } });
         setHolders(res.data.data);
       } catch (err) {
         console.log("Error fetching holders", err);
@@ -53,7 +56,7 @@ export default function HolderList({token}) {
       return;
     }
     try {
-      await axios.delete(`http://localhost:3000/deleteHolder/${id}`);
+      await axios.delete(`${url}/deleteHolder/${id}`);
       setHolders((prev) => prev.filter(h => h._id !== id));
 
     } catch (err) {

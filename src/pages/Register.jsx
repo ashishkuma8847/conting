@@ -16,6 +16,7 @@ const navigate = useNavigate()
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
+    const url =process.env.REACT_APP_API_URL
 
   const submit = async (e) => {
     e.preventDefault();
@@ -25,7 +26,7 @@ const navigate = useNavigate()
 
     try {
       const res = await axios.post(
-        "http://localhost:3000/register",
+        `${url}/register`,
         form
       );
       setSuccess(res.data.message || "Registered successfully");

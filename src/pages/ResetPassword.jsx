@@ -8,13 +8,15 @@ export default function ResetPassword({email}) {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const navigate = useNavigate()
+      const url =process.env.REACT_APP_API_URL
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setMessage("");
 
     try {
-      const res = await axios.post("http://localhost:3000/reset-password", {
+      const res = await axios.post(`${url}/reset-password`, {
         email,
         newPassword,
       });

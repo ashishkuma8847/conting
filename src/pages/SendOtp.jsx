@@ -2,13 +2,15 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
-export default function OtpFlow({onVerified}) {
+export default function OtpFlow({onVerified,token}) {
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
   const [step, setStep] = useState(1); // 1: send OTP, 2: verify OTP
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const navigate = useNavigate()
+      const url =process.env.REACT_APP_API_URL
+
   useEffect(() => {
    if (message === "OTP verified successfully") {
      onVerified(email);
@@ -19,10 +21,8 @@ export default function OtpFlow({onVerified}) {
     setLoading(true);
     setMessage("");
     try {
-      const res = await axios.post("http://localhost:3000/send-otp", { email });
-      axios.get("http://localhost:3000/getall", {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
-      });
+      const res = await axios.post(`${url}/send-otp`, { email },{ headers: { Authorization: `Bearer ${token}` } });
+      
       setMessage(res.data.message);
       setStep(2);
     } catch (err) {

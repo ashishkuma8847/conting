@@ -34,7 +34,7 @@ function App() {
               <Route
                 path="/sendotp"
                 element={
-                  <SendOtp onVerified={(email) => setemailvalue(email)} />
+                  <SendOtp onVerified={(email) => setemailvalue(email)}  token={tokenvalue}/>
                 }
               />
               <Route
