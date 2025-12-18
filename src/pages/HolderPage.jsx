@@ -119,7 +119,7 @@ axios.get("http://localhost:3000/getall", {
     const doc = new jsPDF();
 
     doc.setFontSize(18);
-    doc.text(`${name} Table`, 14, 20);
+    doc.text(`${name} Details`, 14, 20);
 
     const headers = ["S.No", ...inputFields.map(f => f.label), "Created At"];
 
@@ -135,7 +135,7 @@ axios.get("http://localhost:3000/getall", {
       startY: 30,
     });
 
-    doc.save(`${name}-table.pdf`);
+    doc.save(`${name}.pdf`);
   };
 
   return (

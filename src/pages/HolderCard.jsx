@@ -9,7 +9,7 @@ const override: CSSProperties = {
   margin: "0 auto",
   borderColor: "C",
 };
-
+console.log(localStorage.getItem("token"))
 export default function HolderList() {
   const [holders, setHolders] = useState([]);
   const [loading, Setloading] = useState(false)
@@ -35,7 +35,7 @@ export default function HolderList() {
   useEffect(() => {
     const fetchHolders = async () => {
       try {
-        const res = await axios.get("http://localhost:3000/getall");
+        const res = await axios.get("http://localhost:3000/getall", { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } });
         setHolders(res.data.data);
       } catch (err) {
         console.log("Error fetching holders", err);
