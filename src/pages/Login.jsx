@@ -26,7 +26,7 @@ export default function Login({onVerifiedtoken}) {
     setLoading(true);
 
     try {
-      const res = await axios.post(" https://render.com/docs/web-services#port-binding/login", form);
+      const res = await axios.post("https://cunting-backend-5.onrender.com/login", form);
 
       alert(res.data.message || "Login successful");
 
