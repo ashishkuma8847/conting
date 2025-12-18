@@ -10,18 +10,39 @@ import ResetPassword from "./pages/ResetPassword";
 import { useState } from "react";
 
 function App() {
-  const [emailvalue,setemailvalue]=useState("")
+  const [emailvalue, setemailvalue] = useState("");
+  const [tokenvalue, settokenvalue] = useState("");
   return (
     <>
       <BrowserRouter>
         <Animated />
         <Routes>
-           <Route path="/home" element={<HolderList />} />
-        <Route path="/table/:holderId" element={<TablePage />} />
-        <Route path="/" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/sendotp" element={<SendOtp onVerified={(email) => setemailvalue(email)}/>} />
-        <Route path="/resetpassword" element={<ResetPassword  email={emailvalue}/>} />
+          {!tokenvalue ? (
+            <Route
+              path="/"
+              element={<Login onVerifiedtoken={(e) => settokenvalue(e)} />}
+            />
+          ) : (
+            <>
+              <Route path="/home" element={<HolderList token={tokenvalue} />} />
+              <Route path="/table/:holderId" element={<TablePage token={tokenvalue}/>} />
+              <Route
+                path="/"
+                element={<Login onVerifiedtoken={(e) => settokenvalue(e)} />}
+              />
+              <Route path="/register" element={<Register />} />
+              <Route
+                path="/sendotp"
+                element={
+                  <SendOtp onVerified={(email) => setemailvalue(email)} />
+                }
+              />
+              <Route
+                path="/resetpassword"
+                element={<ResetPassword email={emailvalue} />}
+              />
+            </>
+          )}
         </Routes>
       </BrowserRouter>
     </>

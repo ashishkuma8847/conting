@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 
-export default function Login() {
+export default function Login({onVerifiedtoken}) {
   const [form, setForm] = useState({
     email: "",
     password: "",
@@ -10,7 +10,12 @@ export default function Login() {
   const navigate = useNavigate()
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
+  const [token, settoken] = useState("");
+  useEffect(() => {
+    if(token){
+      onVerifiedtoken(token);
+    }
+ }, [token,onVerifiedtoken]);
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
@@ -21,13 +26,13 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const res = await axios.post("http://localhost:3000/login", form);
+      const res = await axios.post(" https://render.com/docs/web-services#port-binding/login", form);
 
       alert(res.data.message || "Login successful");
 
       // token save example
       if (res.data.token) {
-        localStorage.setItem("token", res.data.token);
+        settoken(res.data.token)
       }
       navigate("/home")
 

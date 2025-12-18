@@ -12,7 +12,7 @@ const override: CSSProperties = {
   borderColor: "C",
 };
 
-export default function TablePage() {
+export default function TablePage({ token }) {
   const { holderId } = useParams();
 
   const [inputFields, setInputFields] = useState([]);
@@ -32,7 +32,7 @@ export default function TablePage() {
 
     };
     fetchHolder();
-  }, []);
+  }, [holderId]);
   // ------------------------------------------
   // ADD INPUT FIELD
   // ------------------------------------------
@@ -40,7 +40,10 @@ export default function TablePage() {
     setLoadingInput(true)
 
     const label = prompt("Enter field label");
-    if (!label) return;
+    if (!label) {
+      setLoadingInput(false);
+      return;
+    }
 
     await axios.post(`http://localhost:3000/addField/${holderId}`, {
       field: label
@@ -59,11 +62,14 @@ export default function TablePage() {
   // ------------------------------------------
   // ADD ROW
   // ------------------------------------------
-  const addRow = async () => {
+  const addRow = async (e) => {
+    e.preventDefault()
     setLoadingRow(true)
     const empty = inputFields.some((x) => !x.value.trim());
-    if (empty) return alert("Fill all fields");
-
+    if (empty) {
+      alert("Fill all fields");
+      return
+    }
     const values = inputFields.map((f) => f.value);
 
     const res = await axios.post(
@@ -84,7 +90,10 @@ export default function TablePage() {
     setLoadingRowdelete(true)
 
     const sure = window.confirm("Delete this row?");
-    if (!sure) return;
+    if (!sure) {
+      setLoadingRowdelete(false);
+      return;
+    }
 
     const res = await axios.delete(
       `http://localhost:3000/deleteRow/${holderId}/${index}`
@@ -99,14 +108,15 @@ export default function TablePage() {
     setLoadingCross(true)
 
     const sure = window.confirm("Delete this input field?");
-    if (!sure) return;
+    if (!sure) {
+      setLoadingCross(false);
+      return;
+    }
 
     const res = await axios.delete(
-      `http://localhost:3000/deleteField/${holderId}/${index}`
+      `http://localhost:3000/deleteField/${holderId}/${index}`, { headers: { Authorization: `Bearer ${token}` } }
     );
-axios.get("http://localhost:3000/getall", {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
-      });
+
     // Update UI with new updated backend data
     setInputFields(res.data.fields.map(f => ({ label: f, value: "" })));
     setRows(res.data.rows);
@@ -144,7 +154,7 @@ axios.get("http://localhost:3000/getall", {
 
       <div className="backdrop-blur-3xl mt-20 flex flex-col gap-5 text-white p-6 rounded-2xl shadow-xl">
 
-        <Link to="/">
+        <Link to="/home">
           <button className="px-4 py-2 text-white  rounded-lg"><FaArrowLeftLong className="text-[30px]" /></button>
         </Link>
 
@@ -167,7 +177,7 @@ axios.get("http://localhost:3000/getall", {
           <span>Create Input</span>
         </div>
 
-         <form onSubmit={addRow}>
+        <form onSubmit={addRow}>
           <div className="grid grid-cols-4 gap-4 mb-4">
             {inputFields.map((f, index) => (
               <div key={index} className="relative">
@@ -183,7 +193,7 @@ axios.get("http://localhost:3000/getall", {
                 />
 
                 <button
-                  type="button" 
+                  type="button"
                   onClick={() => deleteField(index)}
                   className="absolute top-3  right-[30px]"
                 >
