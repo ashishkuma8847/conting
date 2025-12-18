@@ -17,13 +17,6 @@ function App() {
       <BrowserRouter>
         <Animated />
         <Routes>
-          {!tokenvalue ? (
-            <Route
-              path="/"
-              element={<Login onVerifiedtoken={(e) => settokenvalue(e)} />}
-            />
-          ) : (
-            <>
               <Route path="/home" element={<HolderList token={tokenvalue} />} />
               <Route path="/table/:holderId" element={<TablePage token={tokenvalue}/>} />
               <Route
@@ -41,8 +34,6 @@ function App() {
                 path="/resetpassword"
                 element={<ResetPassword email={emailvalue} />}
               />
-            </>
-          )}
         </Routes>
       </BrowserRouter>
     </>
